@@ -1,0 +1,113 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Версия релиза (например, v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Build with PyInstaller
+        run: |
+          uv run pyinstaller --onefile --windowed --name excel-automation-windows src/main.py
+
+      - name: Prepare artifact
+        run: |
+          mkdir dist-zip
+          Compress-Archive -Path dist\excel-automation-windows.exe -DestinationPath dist-zip\excel-automation-${{ github.event.inputs.version }}-windows.zip
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-windows.zip
+          retention-days: 7
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system Python 3.12 and Tkinter
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3.12 python3.12-venv python3.12-dev python3-tk tk8.6-dev tcl8.6-dev
+
+      - name: Install uv for dependency management only
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Create virtual environment with system Python
+        run: |
+          uv venv --python /usr/bin/python3.12
+          source .venv/bin/activate
+          uv sync --frozen
+
+      - name: Build with PyInstaller using system Python
+        run: |
+          source .venv/bin/activate
+          uv run pyinstaller --onefile --windowed \
+            --hidden-import tkinter \
+            --name excel-automation-linux src/main.py
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p dist-zip
+          zip -j dist-zip/excel-automation-${{ github.event.inputs.version }}-linux.zip dist/excel-automation-linux
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-linux.zip
+          retention-days: 7
+
+  create-release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: ls -R artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Релиз ${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/windows-build/*.zip
+            artifacts/linux-build/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
