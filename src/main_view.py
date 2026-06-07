@@ -25,7 +25,7 @@ class MainView:
 
         tk.Label(
             main_frame,
-            text="СиБГУТИ",
+            text="СибГУТИ",
             font=("Arial", 24, "bold"),
             bg="#f0f0f0",
             fg="#2c3e50",
