@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import datetime
+from dataclasses import dataclass
 
 from docx import Document
 from docx.enum.table import WD_ALIGN_VERTICAL
