@@ -19,9 +19,7 @@ class MainModel:
         for observer in self._observers:
             observer.on_progress(current, total, message)
 
-    def notify_file_processed(
-        self, file_path: str, success: bool, message: str = ""
-    ) -> None:
+    def notify_file_processed(self, message: str = "") -> None:
         for observer in self._observers:
             observer.on_file_processed(message)
 
@@ -46,13 +44,9 @@ class MainModel:
             try:
                 record = self.processor.process_excel_file(file_path)
                 self.records.append(record)
-                self.notify_file_processed(
-                    file_path, True, f"  {record.specialization}"
-                )
+                self.notify_file_processed(f"  {record.specialization}")
             except Exception:
                 self.notify_file_processed(
-                    file_path,
-                    False,
                     f"Ошибка: {file_path} не пригоден для извлечения данных",
                 )
 
