@@ -49,8 +49,12 @@ class MainModel:
                 self.notify_file_processed(
                     file_path, True, f"  {record.specialization}"
                 )
-            except Exception as e:
-                self.notify_file_processed(file_path, False, f"Ошибка: {str(e)}")
+            except Exception:
+                self.notify_file_processed(
+                    file_path,
+                    False,
+                    f"Ошибка: {file_path} не пригоден для извлечения данных",
+                )
 
         self.notify_progress(total, total, "Загрузка завершена")
         return self.records
