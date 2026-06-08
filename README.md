@@ -16,6 +16,7 @@
 |-|-|
 | Python | 3.12.3 |
 | UV | 0.11.4 |
+| tkinter | 8.6 |
 | openpyxl | 3.1.5 |
 | python-docx | 1.2.0 |
 | pyinstaller | 6.20.0 |
