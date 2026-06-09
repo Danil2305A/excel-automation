@@ -67,17 +67,11 @@ class WordWriter:
         p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         run = p.add_run(f"""Приложение № 1
         к договору №____
-        от «___» _____{datetime.datetime.now().year}г.""")
-        run.font.name = "Times New Roman"
+        от «____»____________ {datetime.datetime.now().year}г.
+        о практической подготовке обучающихся""")
+        run.font.name = "XO Thames"
         run.font.size = Pt(12)
-        run._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")  # type: ignore
-
-        p = self.doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        run = p.add_run("о практической подготовке обучающихся")
-        run.font.name = "Times New Roman"
-        run.font.size = Pt(12)
-        run._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")  # type: ignore
+        run._element.rPr.rFonts.set(qn("w:eastAsia"), "XO Thames")  # type: ignore
 
         self.doc.add_paragraph()
 
