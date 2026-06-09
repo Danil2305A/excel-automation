@@ -88,16 +88,24 @@ class MainView:
         self.status_text = tk.Text(
             status_frame,
             height=10,
-            font=("Consolas", 9),
+            font=("Consolas", 11),
             bg="#d6d6d6",
-            wrap=tk.WORD,
+            wrap=tk.NONE,
             state=tk.DISABLED,
         )
         self.status_text.pack(fill=tk.BOTH, expand=True)
 
-        scrollbar = ttk.Scrollbar(self.status_text, command=self.status_text.yview)
-        self.status_text.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        v_scrollbar = ttk.Scrollbar(self.status_text, command=self.status_text.yview)
+        h_scrollbar = ttk.Scrollbar(
+            self.status_text, command=self.status_text.xview, orient=tk.HORIZONTAL
+        )
+
+        self.status_text.configure(
+            yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set
+        )
+
+        v_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
 
         style = ttk.Style()
 
