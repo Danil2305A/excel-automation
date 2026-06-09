@@ -22,8 +22,8 @@ class PracticeData:
 class Record:
     specialization: str
     practices: list[PracticeData]
-    max_student_count: str = "150"
-    practice_format: str = "очно, с применением ДОТ"
+    max_student_count: str = "15"
+    practice_format: str = "Очно, с применением ДОТ"
 
 
 class WordWriter:
