@@ -35,7 +35,11 @@ jobs:
       - name: Prepare artifact
         run: |
           mkdir dist-zip
-          Compress-Archive -Path dist\excel-automation-windows.exe -DestinationPath dist-zip\excel-automation-${{ github.event.inputs.version }}-windows.zip
+          mkdir dist-zip\excel-automation-${{ github.event.inputs.version }}-windows
+          Copy-Item -Path dist\excel-automation-windows.exe -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows\
+          Copy-Item -Path images -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows\ -Recurse
+          Copy-Item -Path README.md -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows\
+          Compress-Archive -Path dist-zip\excel-automation-${{ github.event.inputs.version }}-windows -DestinationPath dist-zip\excel-automation-${{ github.event.inputs.version }}-windows.zip
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -76,7 +80,12 @@ jobs:
       - name: Prepare artifact
         run: |
           mkdir -p dist-zip
-          zip -j dist-zip/excel-automation-${{ github.event.inputs.version }}-linux.zip dist/excel-automation-linux
+          mkdir -p dist-zip/excel-automation-${{ github.event.inputs.version }}-linux
+          cp dist/excel-automation-linux dist-zip/excel-automation-${{ github.event.inputs.version }}-linux/
+          cp -r images dist-zip/excel-automation-${{ github.event.inputs.version }}-linux/
+          cp README.md dist-zip/excel-automation-${{ github.event.inputs.version }}-linux/
+          cd dist-zip
+          zip -r excel-automation-${{ github.event.inputs.version }}-linux.zip excel-automation-${{ github.event.inputs.version }}-linux
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
