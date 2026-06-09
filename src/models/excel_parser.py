@@ -30,7 +30,7 @@ class Specialization:
 class ExcelParser:
     def __init__(self, excel_filepath: str):
         self.excel_filepath = excel_filepath
-        self.wb = openpyxl.load_workbook(excel_filepath)
+        self.wb = openpyxl.load_workbook(excel_filepath, read_only=True)
 
     def get_specialization(self) -> Specialization:
         sheet = self.wb[Specialization.sheet_name]
@@ -55,17 +55,18 @@ class ExcelParser:
         """
         sheet = self.wb[Practice.sheet_name]
 
-        header = list(sheet.iter_rows(values_only=True))[0]
+        rows = list(sheet.iter_rows(values_only=True))
+        header = rows[0]
         min_col = header.index("Название практики") + 1
         max_col = header.index("Курс") + 1
 
-        first_col = list(sheet.iter_cols(values_only=True))[0]
+        first_col = [rows[i][0] for i in range(len(rows))]
         for i, c in enumerate(first_col):
             if c is not None and "Вид практики" in c:  # type: ignore
                 min_row = i + 1
                 break
 
-        second_col = list(sheet.iter_cols(values_only=True))[1]
+        second_col = [rows[i][1] for i in range(len(rows))]
         for i, c in enumerate(second_col[::-1]):
             if c is not None:
                 max_row = len(second_col) - i
