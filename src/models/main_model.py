@@ -34,7 +34,7 @@ class MainModel:
             return []
 
         total = len(excel_files)
-        self.records = []
+        self.records.clear()
 
         for idx, file_path in enumerate(excel_files, 1):
             self.notify_progress(
