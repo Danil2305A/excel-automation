@@ -93,9 +93,57 @@ jobs:
           name: linux-build
           path: dist-zip/excel-automation-${{ github.event.inputs.version }}-linux.zip
           retention-days: 7
+    
+  build-redos:
+    runs-on: ubuntu-latest
+    container:
+      image: almalinux:9
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          dnf install -y python3.12 python3.12-devel python3-tkinter tk-devel \
+            gcc-c++ make git zip
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Python dependencies
+        run: |
+          uv venv --python python3.12
+          source .venv/bin/activate
+          uv sync --frozen
+
+      - name: Build with PyInstaller
+        run: |
+          source .venv/bin/activate
+          uv run pyinstaller --onefile --windowed \
+            --hidden-import tkinter \
+            --name excel-automation-redos src/main.py
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p dist-zip
+          mkdir -p dist-zip/excel-automation-${{ github.event.inputs.version }}-redos
+          cp dist/excel-automation-redos dist-zip/excel-automation-${{ github.event.inputs.version }}-redos/
+          cp -r images dist-zip/excel-automation-${{ github.event.inputs.version }}-redos/
+          cp README.md dist-zip/excel-automation-${{ github.event.inputs.version }}-redos/
+          cd dist-zip
+          zip -r excel-automation-${{ github.event.inputs.version }}-redos.zip excel-automation-${{ github.event.inputs.version }}-redos
+
+      - name: Upload RedOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: redos-build
+          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-redos.zip
+          retention-days: 7
 
   create-release:
-    needs: [build-windows, build-linux]
+    needs: [build-windows, build-linux, build-redos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -118,5 +166,6 @@ jobs:
           files: |
             artifacts/windows-build/*.zip
             artifacts/linux-build/*.zip
+            artifacts/redos-build/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
