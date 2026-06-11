@@ -71,7 +71,3 @@ class MainModel:
             "total_records": len(self.records),
             "specializations": [r.specialization for r in self.records],
         }
-
-    def clear_data(self) -> None:
-        self.records = []
-        self.selected_folder = ""
