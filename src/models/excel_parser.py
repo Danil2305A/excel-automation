@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 import openpyxl
@@ -105,7 +106,7 @@ class ExcelParser:
                     Practice(
                         type=current_practice_type.strip(),
                         name=practice_name.strip(),  # type: ignore
-                        course=practice_course,
+                        course=",".join(re.findall(r"\d", practice_course)),
                     )
                 )
 
