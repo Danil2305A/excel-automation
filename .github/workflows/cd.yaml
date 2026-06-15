@@ -97,7 +97,7 @@ jobs:
   build-redos:
     runs-on: ubuntu-latest
     container:
-      image: almalinux:9
+      image: almalinux:8
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
