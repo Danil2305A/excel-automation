@@ -51,6 +51,7 @@ class MainModel:
                 )
 
         self.notify_progress(total, total, "Загрузка завершена")
+        self.records.sort(key=lambda record: record.specialization)
         return self.records
 
     def generate_word_document(self, output_path: str) -> bool:
