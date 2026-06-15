@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,26 +30,26 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          uv run pyinstaller --onefile --windowed --name excel-automation-windows src/main.py
+          uv run pyinstaller --onefile --windowed --name app src/main.py
 
       - name: Prepare artifact
         run: |
           mkdir dist-zip
-          mkdir dist-zip\excel-automation-${{ github.event.inputs.version }}-windows
-          Copy-Item -Path dist\excel-automation-windows.exe -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows\
-          Copy-Item -Path images -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows\ -Recurse
-          Copy-Item -Path README.md -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows\
-          Compress-Archive -Path dist-zip\excel-automation-${{ github.event.inputs.version }}-windows -DestinationPath dist-zip\excel-automation-${{ github.event.inputs.version }}-windows.zip
+          mkdir dist-zip\excel-automation-${{ github.event.inputs.version }}-windows-11-x64
+          Copy-Item -Path dist\app.exe -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows-11-x64\
+          Copy-Item -Path images -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows-11-x64\ -Recurse
+          Copy-Item -Path README.md -Destination dist-zip\excel-automation-${{ github.event.inputs.version }}-windows-11-x64\
+          Compress-Archive -Path dist-zip\excel-automation-${{ github.event.inputs.version }}-windows-11-x64 -DestinationPath dist-zip\excel-automation-${{ github.event.inputs.version }}-windows-11-x64.zip
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-windows.zip
+          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-windows-11-x64.zip
           retention-days: 7
 
-  build-linux:
-    runs-on: ubuntu-latest
+  build-ubuntu:
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,35 +67,33 @@ jobs:
       - name: Create virtual environment with system Python
         run: |
           uv venv --python /usr/bin/python3.12
-          source .venv/bin/activate
           uv sync --frozen
 
       - name: Build with PyInstaller using system Python
         run: |
-          source .venv/bin/activate
           uv run pyinstaller --onefile --windowed \
             --hidden-import tkinter \
-            --name excel-automation-linux src/main.py
+            --name app src/main.py
 
       - name: Prepare artifact
         run: |
           mkdir -p dist-zip
-          mkdir -p dist-zip/excel-automation-${{ github.event.inputs.version }}-linux
-          cp dist/excel-automation-linux dist-zip/excel-automation-${{ github.event.inputs.version }}-linux/
-          cp -r images dist-zip/excel-automation-${{ github.event.inputs.version }}-linux/
-          cp README.md dist-zip/excel-automation-${{ github.event.inputs.version }}-linux/
+          mkdir -p dist-zip/excel-automation-${{ github.event.inputs.version }}-ubuntu-24.04-x64
+          cp dist/app dist-zip/excel-automation-${{ github.event.inputs.version }}-ubuntu-24.04-x64/
+          cp -r images dist-zip/excel-automation-${{ github.event.inputs.version }}-ubuntu-24.04-x64/
+          cp README.md dist-zip/excel-automation-${{ github.event.inputs.version }}-ubuntu-24.04-x64/
           cd dist-zip
-          zip -r excel-automation-${{ github.event.inputs.version }}-linux.zip excel-automation-${{ github.event.inputs.version }}-linux
+          zip -r excel-automation-${{ github.event.inputs.version }}-ubuntu-24.04-x64.zip excel-automation-${{ github.event.inputs.version }}-ubuntu-24.04-x64
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-build
-          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-linux.zip
+          name: ubuntu-build
+          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-ubuntu-24.04-x64.zip
           retention-days: 7
     
   build-redos:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: almalinux:8
     steps:
@@ -115,36 +113,34 @@ jobs:
       - name: Install Python dependencies
         run: |
           uv venv --python python3.12
-          source .venv/bin/activate
           uv sync --frozen
 
       - name: Build with PyInstaller
         run: |
-          source .venv/bin/activate
           uv run pyinstaller --onefile --windowed \
             --hidden-import tkinter \
-            --name excel-automation-redos src/main.py
+            --name app src/main.py
 
       - name: Prepare artifact
         run: |
           mkdir -p dist-zip
-          mkdir -p dist-zip/excel-automation-${{ github.event.inputs.version }}-redos
-          cp dist/excel-automation-redos dist-zip/excel-automation-${{ github.event.inputs.version }}-redos/
-          cp -r images dist-zip/excel-automation-${{ github.event.inputs.version }}-redos/
-          cp README.md dist-zip/excel-automation-${{ github.event.inputs.version }}-redos/
+          mkdir -p dist-zip/excel-automation-${{ github.event.inputs.version }}-redos-8.0.2-x64
+          cp dist/app dist-zip/excel-automation-${{ github.event.inputs.version }}-redos-8.0.2-x64/
+          cp -r images dist-zip/excel-automation-${{ github.event.inputs.version }}-redos-8.0.2-x64/
+          cp README.md dist-zip/excel-automation-${{ github.event.inputs.version }}-redos-8.0.2-x64/
           cd dist-zip
-          zip -r excel-automation-${{ github.event.inputs.version }}-redos.zip excel-automation-${{ github.event.inputs.version }}-redos
+          zip -r excel-automation-${{ github.event.inputs.version }}-redos-8.0.2-x64.zip excel-automation-${{ github.event.inputs.version }}-redos-8.0.2-x64
 
       - name: Upload RedOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: redos-build
-          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-redos.zip
+          path: dist-zip/excel-automation-${{ github.event.inputs.version }}-redos-8.0.2-x64.zip
           retention-days: 7
 
   create-release:
-    needs: [build-windows, build-linux, build-redos]
-    runs-on: ubuntu-latest
+    needs: [build-windows, build-ubuntu, build-redos]
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -160,12 +156,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.version }}
-          name: Релиз ${{ github.event.inputs.version }}
+          name: ${{ github.event.inputs.version }}
           draft: false
           prerelease: false
           files: |
             artifacts/windows-build/*.zip
-            artifacts/linux-build/*.zip
+            artifacts/ubuntu-build/*.zip
             artifacts/redos-build/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
