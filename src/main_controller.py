@@ -86,7 +86,8 @@ class MainController:
 
         self.is_generating = True
         self.view.set_download_button_state(False)
-        self.view.add_status_message("Формирование Word-документа...")
+        self.view.set_load_button_state(False)
+        self.view.update_progress(0, 100)
 
         thread = threading.Thread(target=self._generate_thread, args=(save_path,))
         thread.daemon = True
@@ -108,3 +109,4 @@ class MainController:
         finally:
             self.is_generating = False
             self.view.set_download_button_state(True)
+            self.view.set_load_button_state(True)

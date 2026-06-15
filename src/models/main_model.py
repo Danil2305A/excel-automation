@@ -59,7 +59,9 @@ class MainModel:
             return False
 
         try:
+            self.notify_progress(50, 100, "Формирование Word-документа...")
             self.processor.process_word_file(output_path, self.records)
+            self.notify_progress(100, 100, "Word-документ сформирован")
             return True
         except Exception as e:
             raise e
