@@ -15,6 +15,7 @@ class MainController:
         self.view.on_download_click = self.handle_download  # type: ignore
 
         self.is_loading = False
+        self.is_generating = False
 
     def on_progress(self, current: int, total: int, message: str) -> None:
         self.view.update_progress(current, total)
@@ -74,15 +75,25 @@ class MainController:
             )
             return
 
+        if self.is_generating:
+            self.view.add_status_message("Генерация документа уже выполняется...")
+            return
+
         save_path = self.view.ask_for_save_path()
         if not save_path:
             self.view.add_status_message("Сохранение отменено")
             return
 
-        try:
-            self.view.add_status_message("Формирование Word-документа...")
-            self.view.set_download_button_state(False)
+        self.is_generating = True
+        self.view.set_download_button_state(False)
+        self.view.add_status_message("Формирование Word-документа...")
 
+        thread = threading.Thread(target=self._generate_thread, args=(save_path,))
+        thread.daemon = True
+        thread.start()
+
+    def _generate_thread(self, save_path: str) -> None:
+        try:
             success = self.model.generate_word_document(save_path)
 
             if success:
@@ -95,4 +106,5 @@ class MainController:
             self.view.show_error_message(str(e))
             self.view.add_status_message(f"Ошибка: {str(e)}")
         finally:
+            self.is_generating = False
             self.view.set_download_button_state(True)
