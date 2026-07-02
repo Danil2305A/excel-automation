@@ -2,6 +2,7 @@ import os
 from typing import Any
 
 from models.data_processor import DataProcessor
+from models.file_processor import FileProcessor
 from models.word_writer import Record
 
 
@@ -9,7 +10,8 @@ class MainModel:
     def __init__(self) -> None:
         self.selected_folder: str = ""
         self.records: list[Record] = []
-        self.processor = DataProcessor()
+        self.file_processor = FileProcessor()
+        self.data_processor = DataProcessor()
         self._observers: list = []
 
     def add_observer(self, observer: Any) -> None:
@@ -25,9 +27,9 @@ class MainModel:
 
     def load_all_files(self, folder_path: str) -> list[Record]:
         self.selected_folder = folder_path
-        self.processor.selected_folder = folder_path
+        self.file_processor.selected_folder = folder_path
 
-        excel_files = self.processor.scan_files()
+        excel_files = self.file_processor.scan_files()
 
         if not excel_files:
             self.notify_progress(0, 0, "Excel-файлы не найдены")
@@ -42,7 +44,7 @@ class MainModel:
             )
 
             try:
-                record = self.processor.process_excel_file(file_path)
+                record = self.file_processor.process_excel_file(file_path)
                 self.records.append(record)
                 self.notify_file_processed(f"  {record.specialization}")
             except Exception:
@@ -51,7 +53,7 @@ class MainModel:
                 )
 
         self.notify_progress(total, total, "Загрузка завершена")
-        self.records.sort(key=lambda record: record.specialization)
+        self.data_processor.process_records(records=self.records)
         return self.records
 
     def generate_word_document(self, output_path: str) -> bool:
@@ -60,7 +62,7 @@ class MainModel:
 
         try:
             self.notify_progress(50, 100, "Формирование Word-документа...")
-            self.processor.process_word_file(output_path, self.records)
+            self.file_processor.process_word_file(output_path, self.records)
             self.notify_progress(100, 100, "Word-документ сформирован")
             return True
         except Exception as e:

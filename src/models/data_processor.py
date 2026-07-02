@@ -1,41 +1,54 @@
-import os
-from dataclasses import dataclass
-
-from models.excel_parser import ExcelParser, Practice, Specialization
-from models.word_writer import PracticeData, Record, WordWriter
+from models.word_writer import Record
 
 
-@dataclass
 class DataProcessor:
-    selected_folder: str = ""
+    def __parse_practice(self, practice: str) -> tuple[str, str]:
+        if " - " in practice:
+            type, name = practice.split(" - ", 1)
+            return type, name
+        return practice, ""
 
-    def scan_files(self) -> list[str]:
-        excel_files = []
-        for root, _, files in os.walk(self.selected_folder):
-            for file in files:
-                if file.endswith((".xlsx", ".xls")):
-                    excel_files.append(os.path.join(root, file))
-        return excel_files
+    def __get_type_order(self, type: str) -> int:
+        order = {
+            "Учебная практика": 1,
+            "Производственная практика": 2,
+            "Преддипломная практика": 3,
+        }
+        return order.get(type, 999)
 
-    def process_excel_file(self, filepath: str) -> Record:
-        excel_parser: ExcelParser = ExcelParser(filepath)
+    def process_records(self, records: list[Record]) -> None:
+        if not records:
+            return
 
-        try:
-            specialization: Specialization = excel_parser.get_specialization()
-            practices: list[Practice] = excel_parser.get_practices()
+        records.sort(key=lambda record: record.specialization)
 
-            practice_data_list = []
-            for practice in practices:
-                practice_data_list.append(
-                    PracticeData(practice=str(practice), course=practice.course)
+        i = 1
+        while i < len(records):
+            current_record = records[i]
+            previous_record = records[i - 1]
+
+            if current_record.specialization == previous_record.specialization:
+                previous_record.practices.extend(current_record.practices)
+                records.pop(i)
+            else:
+                i += 1
+
+        for record in records:
+            if len(record.practices) > 1:
+                seen: set[tuple[str, str]] = set()
+                unique_practices = []
+
+                for practice in record.practices:
+                    key = (practice.practice, practice.course)
+                    if key not in seen:
+                        seen.add(key)
+                        unique_practices.append(practice)
+
+                unique_practices.sort(
+                    key=lambda p: (
+                        self.__get_type_order(self.__parse_practice(p.practice)[0]),
+                        p.course,
+                    )
                 )
 
-            return Record(
-                specialization=str(specialization), practices=practice_data_list
-            )
-        finally:
-            excel_parser.wb.close()
-
-    def process_word_file(self, filepath: str, records: list[Record]) -> None:
-        word_writer: WordWriter = WordWriter(filepath, records)
-        word_writer.generate_document()
+                record.practices = unique_practices
