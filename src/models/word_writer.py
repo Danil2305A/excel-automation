@@ -61,7 +61,6 @@ class WordWriter:
         style = self.doc.styles["Normal"]
         style.font.name = "Times New Roman"
         style.font.size = Pt(12)
-        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
 
         p = self.doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -71,7 +70,6 @@ class WordWriter:
         о практической подготовке обучающихся""")
         run.font.name = "XO Thames"
         run.font.size = Pt(12)
-        run._element.rPr.rFonts.set(qn("w:eastAsia"), "XO Thames")  # type: ignore
 
         self.doc.add_paragraph()
 
@@ -87,7 +85,6 @@ class WordWriter:
         run.font.name = "Times New Roman"
         run.font.size = Pt(12)
         run.font.bold = False
-        run._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")  # type: ignore
 
     def set_header(self, table: Table) -> None:
         headers = [
@@ -112,7 +109,6 @@ class WordWriter:
                     run.font.name = "Times New Roman"
                     run.font.size = Pt(11)
                     run.font.bold = False
-                    run._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
 
             cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
@@ -148,9 +144,6 @@ class WordWriter:
                             run.font.name = "Times New Roman"
                             run.font.size = Pt(11)
                             run.font.bold = False
-                            run._element.rPr.rFonts.set(
-                                qn("w:eastAsia"), "Times New Roman"
-                            )
 
                     cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
